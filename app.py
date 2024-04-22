@@ -2,17 +2,23 @@ import streamlit as st
 import pandas as pd
 import sqlite3 
 import os
-# ecrire une fonction qui execute un code sql 
+
 def sql_executor(raw_code, conn):
-    pass
-# Ecrire une fonction qui donne les noms des tables
+    c = conn.cursor()
+    c.execute(raw_code)
+    data = c.fetchall()
+    return data 
+
 def get_table_names(conn):
-    pass
+    c = conn.cursor()
+    c.execute("SELECT name FROM sqlite_master WHERE type='table';")
+    tables = c.fetchall()
+    return [table[0] for table in tables]
 
 def Home():
     st.title("SQLlite with Streamlit and Python")
     # Select Database
-    db_file_path = st.text_input("Enter Database File Path:")
+    db_file_path = st.text_input("Enter Database File Path")
     if db_file_path:
         # Check if file exists
         if not os.path.exists(db_file_path):
@@ -28,17 +34,18 @@ def Home():
         st.subheader("Database details")
         with st.expander("List of tables"):
             tables = get_table_names(conn)
-            st.write("Tables:", tables)  # Debugging message
+            sql = "SELECT name as name_of_the_table FROM sqlite_master WHERE type='table';"
+            df_table = pd.read_sql(sql, conn)
+            st.write("Tables:", df_table) 
         st.subheader("Table Details")
-        ## Afficher le nom des tables et les détails de chaque colonne pour chaque table 
-        def get_details():
-            pass
-
-
-
-
-
-        
+        if tables:
+            for table in tables:
+                with st.expander(f"{table}", expanded=False):
+                   sql = f"PRAGMA table_info({table});"
+                   df_t =pd.read_sql(sql, conn)
+                   st.write(df_t)
+        else:
+            st.write("No tables found in the database.")
         st.subheader("SQL Query")
         # Columns/Layout
         col1,col2 = st.columns(2)
@@ -51,15 +58,17 @@ def Home():
         # Results Layouts
         with col2:
             if submit_code:
-                st.info("Query Submitted")
+                
+st.info("Query Submitted")
                 st.code(raw_code)
 
         # Results
-        # appliquer la requete avec pandas
+
         with st.expander("Result of the query"):
             try:
-
-                
+                query_results = sql_executor(raw_code, conn) 
+                query_df = pd.DataFrame(query_results)
+                st.dataframe(query_df)
             except:
                 st.error("Syntax error")
         
@@ -82,4 +91,4 @@ def main():
         About()
     
 if __name__ == '__main__':
-    main()
+    main() 
