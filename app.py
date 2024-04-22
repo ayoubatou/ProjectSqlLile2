@@ -16,13 +16,13 @@ def get_table_names(conn):
     return [table[0] for table in tables]
 
 def Home():
-    st.title("SQLlite with Streamlit and Python")
+    st.title("SQLite with Streamlit and Python")
     # Select Database
     db_file_path = st.text_input("Enter Database File Path")
     if db_file_path:
         # Check if file exists
         if not os.path.exists(db_file_path):
-            st.error("Le fichier spécifié n'existe pas.")
+            st.error("The specified file does not exist.")
             return
 
         # Display the selected file path
@@ -41,14 +41,14 @@ def Home():
         if tables:
             for table in tables:
                 with st.expander(f"{table}", expanded=False):
-                   sql = f"PRAGMA table_info({table});"
-                   df_t =pd.read_sql(sql, conn)
-                   st.write(df_t)
+                    sql = f"PRAGMA table_info({table});"
+                    df_t = pd.read_sql(sql, conn)
+                    st.write(df_t)
         else:
             st.write("No tables found in the database.")
         st.subheader("SQL Query")
         # Columns/Layout
-        col1,col2 = st.columns(2)
+        col1, col2 = st.columns(2)
 
         with col1:
             with st.form(key='query_form'):
@@ -58,12 +58,10 @@ def Home():
         # Results Layouts
         with col2:
             if submit_code:
-                
-st.info("Query Submitted")
+                st.info("Query Submitted")
                 st.code(raw_code)
 
         # Results
-
         with st.expander("Result of the query"):
             try:
                 query_results = sql_executor(raw_code, conn) 
@@ -72,15 +70,15 @@ st.info("Query Submitted")
             except:
                 st.error("Syntax error")
         
-        # Table of Info
-        
         # Close the database connection
         conn.close()
+
 def About():
     st.subheader("About John Doe")
-    st.write("Nom: Doe")
-    st.write("Prénom: John")
-    st.write("Groupe: Groupe X")
+    st.write("Last Name: Doe")
+    st.write("First Name: John")
+    st.write("Group: Group X")
+
 def main():
     # Menu
     menu = ["Home", "About"]
@@ -91,4 +89,4 @@ def main():
         About()
     
 if __name__ == '__main__':
-    main() 
+    main()
